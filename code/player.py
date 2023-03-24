@@ -1,4 +1,5 @@
 import pygame
+from os import walk
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, groups):
@@ -6,7 +7,10 @@ class Player(pygame.sprite.Sprite):
         
         # image
         self.import_assets()
-        self.image = self.animation[0]
+        self.frame_index = 0
+        self.status = 'down'
+        # self.image = self.animation[self.frame_index]
+        self.image = self.animations[self.status][self.frame_index]
         self.rect = self.image.get_rect(center = pos)
 
         # float based movement
@@ -15,9 +19,29 @@ class Player(pygame.sprite.Sprite):
         self.speed = 200
 
     def import_assets(self):
-        path = "../graphics/player/right"
-        self.animation = [pygame.image.load(f'{path}/{frame}.png').convert_alpha() for frame in range(4)]
+        self.animations = {}
+        for index, folder in enumerate(walk('graphics/player')):
+            if index == 0:
+                for name in folder[1]:
+                    self.animations[name] = []
+            else: 
+                for file_name in folder[2]:
+                    path = folder[0].replace('\\', '/') + '/' + file_name
+                    print(path)
+                    surf = pygame.image.load(path).convert_alpha()
+                    key = folder[0].split('\\')[1]
+                    self.animations[key].append(surf)
 
+    def animate(self, dt):
+        current_animation = self.animations[self.status]
+        if self.direction.magnitude() != 0:
+            self.frame_index += 10 * dt
+            if self.frame_index > len(current_animation):
+                self.frame_index = 0
+        else:
+            self.frame_index = 0
+        
+        self.image = current_animation[int(self.frame_index)]
 
     def move(self, dt):
         if self.direction.magnitude() != 0:
@@ -30,18 +54,23 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT]:
             self.direction.x = 1
+            self.status = 'right'
         elif keys[pygame.K_LEFT]:
             self.direction.x = -1
+            self.status = 'left'
         else:
             self.direction.x = 0
 
         if keys[pygame.K_UP]:
             self.direction.y = -1
+            self.status = 'up'
         elif keys[pygame.K_DOWN]:
             self.direction.y = 1
+            self.status = 'down'
         else:
             self.direction.y = 0          
 
     def update(self, dt):
         self.input()
         self.move(dt)
+        self.animate(dt)

@@ -3,14 +3,21 @@ import pygame
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, groups):
         super().__init__(groups)
-        self.image = pygame.Surface((50, 50))
-        self.image.fill('red')
+        
+        # image
+        self.import_assets()
+        self.image = self.animation[0]
         self.rect = self.image.get_rect(center = pos)
 
         # float based movement
         self.pos = pygame.math.Vector2(self.rect.center)
         self.direction = pygame.math.Vector2()
         self.speed = 200
+
+    def import_assets(self):
+        path = "../graphics/player/right"
+        self.animation = [pygame.image.load(f'{path}/{frame}.png').convert_alpha() for frame in range(4)]
+
 
     def move(self, dt):
         if self.direction.magnitude() != 0:
@@ -33,8 +40,7 @@ class Player(pygame.sprite.Sprite):
         elif keys[pygame.K_DOWN]:
             self.direction.y = 1
         else:
-            self.direction.y = 0
-                
+            self.direction.y = 0          
 
     def update(self, dt):
         self.input()

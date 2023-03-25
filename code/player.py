@@ -1,15 +1,14 @@
-import pygame
+import pygame, sys
 from os import walk
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, groups):
+    def __init__(self, pos, groups, collision_sprite):
         super().__init__(groups)
         
         # image
         self.import_assets()
         self.frame_index = 0
         self.status = 'down'
-        # self.image = self.animation[self.frame_index]
         self.image = self.animations[self.status][self.frame_index]
         self.rect = self.image.get_rect(center = pos)
 
@@ -17,6 +16,38 @@ class Player(pygame.sprite.Sprite):
         self.pos = pygame.math.Vector2(self.rect.center)
         self.direction = pygame.math.Vector2()
         self.speed = 200
+
+        # collisions
+        self.collisions_sprite = collision_sprite
+
+
+    def collision(self, direction):
+        if direction == 'horizontal':
+            for sprite in self.collisions_sprite.sprites():
+                if sprite.rect.colliderect(self.rect):
+                    if hasattr(sprite, 'name') and sprite.name == 'car':
+                        pygame.quit()
+                        sys.exit()
+                    if self.direction.x > 0:
+                        self.rect.right = sprite.rect.left
+                        self.pos.x = self.rect.centerx
+                    if self.direction.x < 0 :
+                        self.rect.left = sprite.rect.right
+                        self.pos.x = self.rect.centerx
+
+        else:
+            for sprite in self.collisions_sprite.sprites():
+                if sprite.rect.colliderect(self.rect):
+                    if hasattr(sprite, 'name') and sprite.name == 'car':
+                        pygame.quit()
+                        sys.exit()
+                    if self.direction.y > 0:
+                        self.rect.bottom = sprite.rect.top
+                        self.pos.y = self.rect.centery
+                    if self.direction.y < 0 :
+                        self.rect.top = sprite.rect.bottom
+                        self.pos.y = self.rect.centery
+        
 
     def import_assets(self):
         self.animations = {}
@@ -27,7 +58,6 @@ class Player(pygame.sprite.Sprite):
             else: 
                 for file_name in folder[2]:
                     path = folder[0].replace('\\', '/') + '/' + file_name
-                    print(path)
                     surf = pygame.image.load(path).convert_alpha()
                     key = folder[0].split('\\')[1]
                     self.animations[key].append(surf)
@@ -47,8 +77,16 @@ class Player(pygame.sprite.Sprite):
         if self.direction.magnitude() != 0:
             self.direction = self.direction.normalize()
 
-        self.pos += self.direction * self.speed * dt
-        self.rect.center = (round(self.pos.x), round(self.pos.y))
+        # horizontal movement + collision
+        self.pos.x += self.direction.x * self.speed * dt
+        self.rect.centerx = (round(self.pos.x))
+        self.collision('horizontal')
+
+        # vertical movement + collision
+        self.pos.y += self.direction.y * self.speed * dt
+        self.rect.centery = (round(self.pos.y))
+        self.collision('vertical')
+        
 
     def input(self):
         keys = pygame.key.get_pressed()

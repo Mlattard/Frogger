@@ -39,7 +39,7 @@ player = Player((2062, 3274), all_sprites, obstacle_sprites)
 
 #timer
 car_timer = pygame.event.custom_type()
-pygame.time.set_timer(car_timer, 50)
+pygame.time.set_timer(car_timer, 100)
 pos_list = []
 
 # sprite setup

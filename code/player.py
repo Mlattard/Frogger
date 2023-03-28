@@ -60,11 +60,11 @@ class Player(pygame.sprite.Sprite):
             self.hitbox.left = 640
             self.rect.left = 640
         if self.rect.right > 2560:
-            self.pos.y = 2560 - self.rect.width / 2
+            self.pos.x = 2560 - self.rect.width / 2
             self.hitbox.right = 2560
             self.rect.right = 2560
         if self.rect.bottom > 3500:
-            self.pos.y = 3500 + self.rect.height / 2
+            self.pos.y = 3500 - self.rect.height / 2
             self.rect.bottom = 3500
             self.hitbox.centery = self.rect.centery
 
